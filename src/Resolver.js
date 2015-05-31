@@ -16,16 +16,15 @@ export default class Resolver {
     return Promise.all(promises);
   }
 
-  finish() {
+  finish(renderer, values=[]) {
     const total = this.promises.length;
-
-    return Promise.all(this.promises).then((values) => {
-      if (this.promises.length > total) {
-        return this.finish();
-      }
-
-      return values;
-    });
+    renderer();
+    if (this.promises.length > total) {
+      return Promise.all(this.promises).then((valueResults) => {
+        return this.finish(renderer, valueResults);
+      });
+    }
+    return Promise.resolve(values);
   }
 
   freeze() {
@@ -176,37 +175,35 @@ export default class Resolver {
     return instance;
   }
 
-  static renderToString(element) {
+    static renderToString(element) {
     const resolver = new Resolver();
     const context = <Container resolver={resolver}>{element}</Container>;
 
-    React.renderToString(context);
-
-    return resolver.finish().then((data) => {
-      resolver.freeze();
-
-      var html = React.renderToString(context);
-      return {
-        data: resolver.states,
-        toString() { return html; },
-      };
-    });
+    return resolver.finish(()=>React.renderToString(context))
+      .then(() => {
+        resolver.freeze();
+        var html3 = React.renderToString(context);
+        return {
+          data: resolver.states,
+          toString() { return html3; }
+        };
+      });
   }
 
   static renderToStaticMarkup(element) {
     const resolver = new Resolver();
     const context = <Container resolver={resolver}>{element}</Container>;
 
-    React.renderToStaticMarkup(context);
 
-    return resolver.finish().then((data) => {
+    return resolver.finish(()=>React.renderToStaticMarkup(context)).then(() => {
       resolver.freeze();
 
       var html = React.renderToStaticMarkup(context);
       return {
         data: resolver.states,
-        toString() { return html; },
+        toString() { return html; }
       };
     });
   }
+
 }

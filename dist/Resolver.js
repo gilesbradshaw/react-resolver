@@ -1,22 +1,22 @@
 "use strict";
 
-var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _React = require("react");
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _React2 = _interopRequireDefault(_React);
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
 
 var _Container = require("./Container");
 
@@ -48,18 +48,19 @@ var Resolver = (function () {
     }
   }, {
     key: "finish",
-    value: function finish() {
+    value: function finish(renderer) {
       var _this = this;
 
+      var values = arguments[1] === undefined ? [] : arguments[1];
+
       var total = this.promises.length;
-
-      return Promise.all(this.promises).then(function (values) {
-        if (_this.promises.length > total) {
-          return _this.finish();
-        }
-
-        return values;
-      });
+      renderer();
+      if (this.promises.length > total) {
+        return Promise.all(this.promises).then(function (valueResults) {
+          return _this.finish(renderer, valueResults);
+        });
+      }
+      return Promise.resolve(values);
     }
   }, {
     key: "freeze",
@@ -201,7 +202,7 @@ var Resolver = (function () {
         _createClass(ComponentContainer, [{
           key: "render",
           value: function render() {
-            return _React2["default"].createElement(_Container2["default"], _extends({
+            return _react2["default"].createElement(_Container2["default"], _extends({
               component: Component,
               context: this.context,
               props: this.props
@@ -210,7 +211,7 @@ var Resolver = (function () {
         }]);
 
         return ComponentContainer;
-      })(_React2["default"].Component);
+      })(_react2["default"].Component);
 
       ComponentContainer.childContextTypes = props.childContextTypes;
       ComponentContainer.contextTypes = props.contextTypes;
@@ -223,7 +224,7 @@ var Resolver = (function () {
     value: function render(element, node) {
       var instance = arguments[2] === undefined ? new Resolver() : arguments[2];
 
-      _React2["default"].render(_React2["default"].createElement(
+      _react2["default"].render(_react2["default"].createElement(
         _Container2["default"],
         { resolver: instance },
         element
@@ -235,46 +236,47 @@ var Resolver = (function () {
     key: "renderToString",
     value: function renderToString(element) {
       var resolver = new Resolver();
-      var context = _React2["default"].createElement(
+      var context = _react2["default"].createElement(
         _Container2["default"],
         { resolver: resolver },
         element
       );
 
-      _React2["default"].renderToString(context);
-
-      return resolver.finish().then(function (data) {
+      return resolver.finish(function () {
+        return _react2["default"].renderToString(context);
+      }).then(function () {
         resolver.freeze();
-
-        var html = _React2["default"].renderToString(context);
+        var html3 = _react2["default"].renderToString(context);
         return {
           data: resolver.states,
           toString: function toString() {
-            return html;
-          } };
+            return html3;
+          }
+        };
       });
     }
   }, {
     key: "renderToStaticMarkup",
     value: function renderToStaticMarkup(element) {
       var resolver = new Resolver();
-      var context = _React2["default"].createElement(
+      var context = _react2["default"].createElement(
         _Container2["default"],
         { resolver: resolver },
         element
       );
 
-      _React2["default"].renderToStaticMarkup(context);
-
-      return resolver.finish().then(function (data) {
+      return resolver.finish(function () {
+        return _react2["default"].renderToStaticMarkup(context);
+      }).then(function () {
         resolver.freeze();
 
-        var html = _React2["default"].renderToStaticMarkup(context);
+        var html = _react2["default"].renderToStaticMarkup(context);
         return {
           data: resolver.states,
           toString: function toString() {
             return html;
-          } };
+          }
+        };
       });
     }
   }]);
