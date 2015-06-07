@@ -1,6 +1,6 @@
 # React Resolver 
 
-[![Build Status](https://travis-ci.org/gilesbradshaw/react-resolver.svg)](https://travis-ci.org/gilesbradshaw/react-resolver)
+[![Build Status](https://travis-ci.org/gilesbradshaw/react-resolver.svg?branch=travistest)](https://travis-ci.org/gilesbradshaw/react-resolver)
 
 > Isomorphic library to lazy-load data for React components
 
